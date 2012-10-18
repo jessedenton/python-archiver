@@ -151,8 +151,8 @@ class myArchiver(object):
             archiveList.pop(0)
             print 'Destroying old archive: %s' % archiveList[0]
             
-        print 'Archived successfully: (v.%03d) of file %s%s' % ( int(n), self.__name, self.__extension)
-        
+        print 'Archived successfully: (v.%03d) of file %s%s\n' % ( int(n), self.__name, self.__extension)
+        raw_input("Press any key to exit.")
 if __name__ == '__main__':
     myArchiver().archive()
     

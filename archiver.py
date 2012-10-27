@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
 @author: Jesse Denton
-@version: 1.02
+@version: 1.03
 @date: 24-10-2012
 
 USE:
@@ -13,7 +13,7 @@ drag and drop files onto archiver.py
 
 TODO:
 1. Add logging function that creates text files in the archive directory for a history of archives
-2. Add zipfile and / or tarfile to make archives smaller
+2. Add zipfile and / or tarfile type archiver
 
 
 '''
@@ -85,14 +85,20 @@ class MyArchiver(PathManager):
         '''returns path name for the archive directory'''
         return os.path.join(self.fileDir, "Archive", self.fileName)
 
-    def getArchivedFiles(self):
-        '''returns a list of previous archived files'''
-        #TODO: add type / extension check to make sure no weird files are in archive folder
+    def getArchivedFiles(self, *args):
+        '''
+        Returns a list of previous archived files, 
+        passed arguments are file type extension eg ".txt"
+        '''
+        archivePath = self.getArchivePath()
         #make check that the archive path exists
-        if not os.path.exists(self.getArchivePath()):
-            raise IOError, "Archive path doesn't exist %s" % self.getArchivePath()
+        if not os.path.exists(archivePath):
+            raise IOError, "Archive path doesn't exist %s" % archivePath
         
-        return  sorted(os.listdir(self.getArchivePath()))
+        if len(args):       
+            return [x for y in args for x in sorted(os.listdir(archivePath)) if x.endswith(y)]
+        else:
+            return sorted(os.listdir(archivePath))
     
     def isArchived(self):
         '''checker to see if a file has been archived previously'''
@@ -113,12 +119,12 @@ class MyArchiver(PathManager):
 
         #find archive version 
         archiveVersion = 001
-        archiveFiles = self.getArchivedFiles()
+        archiveFiles = self.getArchivedFiles(self.fileExtension)
         if len(archiveFiles):
             lastFile = archiveFiles[-1]
             archiveVersion = int(lastFile.split('.')[1]) + 1
         
-        #begin copy of file NB just realised the class username should be in here
+        #begin copy of file
         newArchiveFile = os.path.join(archivePath, '%s.%03d%s' % (self.fileName, archiveVersion, self.fileExtension))
         try:
             shutil.copyfile(self.filePath, newArchiveFile)
@@ -134,7 +140,7 @@ class MyArchiver(PathManager):
     @classmethod
     def changeUser(cls, username):
         cls._user = username
-        
+
 
 if __name__ == "__main__":
     
@@ -144,3 +150,4 @@ if __name__ == "__main__":
         
     raw_input("Press any key to exit.")
     sys.exit()
+
